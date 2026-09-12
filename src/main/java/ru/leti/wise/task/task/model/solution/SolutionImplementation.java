@@ -15,7 +15,6 @@ import java.util.UUID;
 @Table(name = "solution_implementation")
 @EqualsAndHashCode(callSuper = true)
 public class SolutionImplementation extends Solution {
-
     private String code;
 
     @JdbcTypeCode(SqlTypes.JSON)

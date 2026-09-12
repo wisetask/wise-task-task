@@ -15,7 +15,6 @@ import java.util.UUID;
 @Table(name = "solution_graph")
 @EqualsAndHashCode(callSuper = true)
 public class SolutionGraph extends Solution {
-
     @Column(name = "graph_id")
     private UUID graphId;
 

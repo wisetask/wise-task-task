@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.leti.wise.task.graph.GraphGrpc;
 import ru.leti.wise.task.graph.GraphGrpc.GenerateGraphRequest;
 import ru.leti.wise.task.graph.GraphOuterClass.Graph;
+import ru.leti.wise.task.graph.GraphServiceGrpc;
 
 import java.util.UUID;
 
@@ -15,7 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GraphGrpcService {
 
-    private final GraphStubHolder graphStubHolder;
+    private final GraphServiceGrpc.GraphServiceBlockingStub graphService;
 
     public Graph getGraph(int edgeCount, int vertexCount, boolean isDirect) {
         var request = GenerateGraphRequest.newBuilder()
@@ -24,14 +25,14 @@ public class GraphGrpcService {
                 .setIsDirect(isDirect)
                 .build();
 
-        return graphStubHolder.get().generateRandomGraph(request).getGraph();
+        return graphService.generateRandomGraph(request).getGraph();
     }
 
     public GraphGrpc.CreateGraphResponse createGraph(Graph graph) {
         var request = GraphGrpc.CreateGraphRequest.newBuilder()
                 .setGraph(graph)
                 .build();
-        return graphStubHolder.get().createGraph(request);
+        return graphService.createGraph(request);
     }
 
     public Graph getGraphById(UUID id) {
@@ -39,6 +40,6 @@ public class GraphGrpcService {
                 .setId(id.toString())
                 .build();
 
-        return graphStubHolder.get().getGraphById(request).getGraph();
+        return graphService.getGraphById(request).getGraph();
     }
 }

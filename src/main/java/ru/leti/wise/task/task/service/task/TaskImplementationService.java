@@ -1,11 +1,11 @@
 package ru.leti.wise.task.task.service.task;
 
+import io.grpc.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.leti.wise.task.plugin.PluginOuterClass;
 import ru.leti.wise.task.task.TaskGrpc;
 import ru.leti.wise.task.task.error.BusinessException;
-import ru.leti.wise.task.task.error.ErrorCode;
 import ru.leti.wise.task.task.mapper.SolutionMapper;
 import ru.leti.wise.task.task.model.solution.SolutionImplementation;
 import ru.leti.wise.task.task.model.task.TaskImplementation;
@@ -27,8 +27,12 @@ public class TaskImplementationService {
     private final SolutionRepository solutionRepository;
 
     public TaskGrpc.SolveTaskResponse process(TaskGrpc.SolveTaskRequest request) {
-        var task = (TaskImplementation) taskRepository.findById(UUID.fromString(request.getSolution().getTaskId()))
-                .orElseThrow(() -> new BusinessException(ErrorCode.TASK_NOT_FOUND));
+        var taskId = UUID.fromString(request.getSolution().getTaskId());
+        var task = (TaskImplementation) taskRepository.findById(taskId)
+                .orElseThrow(() -> new BusinessException(
+                        Status.NOT_FOUND,
+                        "Задача с id '%s' не найдена".formatted(taskId)
+                ));
         PluginOuterClass.ImplementationResult result = pluginGrpcService.
                 checkPluginImplementation(request.getSolution().getSolutionImplementation().getCode(),
                         task.getPluginId().toString());

@@ -1,5 +1,6 @@
 package ru.leti.wise.task.task.mapper;
 
+import io.grpc.Status;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -8,10 +9,9 @@ import ru.leti.wise.task.task.error.BusinessException;
 import ru.leti.wise.task.task.model.solution.Solution;
 import ru.leti.wise.task.task.model.solution.SolutionGraph;
 import ru.leti.wise.task.task.model.solution.SolutionImplementation;
+import ru.leti.wise.task.task.model.task.TaskType;
 
 import java.util.List;
-
-import static ru.leti.wise.task.task.error.ErrorCode.INVALID_SOLUTION_TYPE;
 
 @Mapper(componentModel = "spring",
         collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
@@ -23,7 +23,8 @@ public interface SolutionMapper {
         } else if (solution.hasSolutionImplementation()) {
             return toSolutionImplementation(solution);
         }
-        throw new BusinessException(INVALID_SOLUTION_TYPE);
+        throw new BusinessException(Status.INVALID_ARGUMENT, "Неизвестный тип решения. Доступные типы решения: " +
+                TaskType.getStringTypes());
     }
 
     @Mapping(target = "graphId", source = "solution.solutionGraph.graph.id")
@@ -41,11 +42,12 @@ public interface SolutionMapper {
         } else if (solution instanceof SolutionImplementation) {
             return toSolutionImplementation((SolutionImplementation) solution);
         }
-        throw new BusinessException(INVALID_SOLUTION_TYPE);
+        throw new BusinessException(Status.INVALID_ARGUMENT, "Неизвестный тип решения. Доступные типы решения: " +
+                TaskType.getStringTypes());
     }
 
     @Mapping(target = "solutionGraph.graph.id", source = "graphId")
-    @Mapping(target = "solutionGraph.pluginResults", source = "result")
+    @Mapping(target = "solutionGraph.pluginResultsList", source = "result")
     @Mapping(target = "solutionImplementation", ignore = true)
     TaskOuterClass.Solution toSolutionGraph(SolutionGraph solution);
 

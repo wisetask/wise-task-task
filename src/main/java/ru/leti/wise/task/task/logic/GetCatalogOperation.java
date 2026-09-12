@@ -1,5 +1,6 @@
 package ru.leti.wise.task.task.logic;
 
+import io.grpc.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.leti.wise.task.task.TaskGrpc;
@@ -8,8 +9,6 @@ import ru.leti.wise.task.task.mapper.CatalogMapper;
 import ru.leti.wise.task.task.repository.CatalogRepository;
 
 import java.util.UUID;
-
-import static ru.leti.wise.task.task.error.ErrorCode.CATALOG_NOT_FOUND;
 
 @Component
 @RequiredArgsConstructor
@@ -20,7 +19,10 @@ public class GetCatalogOperation {
 
     public TaskGrpc.GetCatalogResponse activate(UUID id) {
         var catalog =catalogRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(CATALOG_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(
+                        Status.NOT_FOUND,
+                        "Каталог с id '%s' не найден".formatted(id)
+                ));
 
         return TaskGrpc.GetCatalogResponse.newBuilder()
                 .setCatalog(catalogMapper.toCatalog(catalog))
