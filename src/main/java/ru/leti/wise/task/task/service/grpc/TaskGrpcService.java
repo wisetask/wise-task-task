@@ -2,6 +2,7 @@ package ru.leti.wise.task.task.service.grpc;
 
 import com.google.protobuf.Empty;
 import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
@@ -45,8 +46,8 @@ public class TaskGrpcService extends TaskServiceImplBase {
     }
 
     @Override
-    public void getAllTask(Empty request, StreamObserver<TaskGrpc.GetAllTaskResponse> responseObserver) {
-        responseObserver.onNext(getTasksOperation.activate());
+    public void getAllTask(TaskGrpc.GetAllTaskRequest request, StreamObserver<TaskGrpc.GetAllTaskResponse> responseObserver) {
+        responseObserver.onNext(getTasksOperation.activate(request));
         responseObserver.onCompleted();
     }
 
@@ -128,8 +129,8 @@ public class TaskGrpcService extends TaskServiceImplBase {
     public static class ErrorHandler {
 
         @GrpcExceptionHandler
-        public Status handleBusinessException(BusinessException e) {
-            return e.getStatus().withDescription(e.getMessage());
+        public StatusRuntimeException handleBusinessException(BusinessException e) {
+            return e.getStatus().withDescription(e.getMessage()).asRuntimeException();
         }
     }
 }

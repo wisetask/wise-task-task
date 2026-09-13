@@ -21,7 +21,7 @@ FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
 
-RUN addgroup -S wise-task && adduser -S wise-task-plugin -G wise-task # security
-USER wise-task-plugin
+RUN addgroup -S wise-task && adduser -S wise-task-task -G wise-task # security
+USER wise-task-task
 
 ENTRYPOINT ["java","-jar","app.jar"]
