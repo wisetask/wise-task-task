@@ -10,7 +10,6 @@ import java.util.UUID;
 @Table(name = "solution")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Solution {
-
     @Id
     private UUID id;
 

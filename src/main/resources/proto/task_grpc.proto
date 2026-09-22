@@ -7,7 +7,7 @@ import "google/protobuf/empty.proto";
 
 service TaskService {
   rpc GetTask(GetTaskRequest) returns (GetTaskResponse);
-  rpc GetAllTask(google.protobuf.Empty) returns (GetAllTaskResponse);
+  rpc GetAllTask(GetAllTaskRequest) returns (GetAllTaskResponse);
   rpc DeleteTask(DeleteTaskRequest) returns (google.protobuf.Empty);
   rpc CreateTask(CreateTaskRequest) returns (CreateTaskResponse);
   rpc UpdateTask(UpdateTaskRequest) returns (UpdateTaskResponse);
@@ -20,6 +20,39 @@ service TaskService {
   rpc UpdateCatalog(UpdateCatalogRequest) returns (UpdateCatalogResponse);
   rpc GetCatalog(GetCatalogRequest) returns (GetCatalogResponse);
   rpc GetAllCatalogs(google.protobuf.Empty) returns (GetAllCatalogsResponse);
+}
+
+message PaginationRequest {
+  int32 page_size = 1;
+  int32 page = 2;
+}
+
+message TaskFilter {
+  optional string name = 1;
+  optional string description = 2;
+  optional string category = 3;
+  optional TaskType task_type = 4;
+  optional string author_id = 5;
+  optional bool is_public = 6;
+}
+
+message GetAllTaskRequest {
+  PaginationRequest pagination = 1;
+  TaskFilter filter = 2;
+}
+
+message PaginationResponse {
+  int32 page = 1;
+  int32 page_size = 2;
+  int64 total_count = 3;
+  int32 total_pages = 4;
+  bool has_next = 5;
+  bool has_previous = 6;
+}
+
+message GetAllTaskResponse {
+  repeated Task items = 1;
+  PaginationResponse pagination = 2;
 }
 
 message CreateCatalogRequest {
@@ -60,10 +93,6 @@ message GetTaskRequest {
 
 message GetTaskResponse {
   Task task = 1;
-}
-
-message GetAllTaskResponse {
-  repeated Task task = 1;
 }
 
 message DeleteTaskRequest {

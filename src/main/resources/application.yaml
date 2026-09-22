@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: wise-task-task
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://${DB:localhost}:${DB_PORT:5432}/${TASK_DB:wise_task_task}
+    username: ${TASK_DB_USER:wise_task_task}
+    password: ${TASK_DB_PASSWORD:wise_task_task}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    generate-ddl: false
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: false
+  grpc:
+    server:
+      port: ${TASK_GRPC_PORT:6567}
+
+logging:
+  level:
+    org.hibernate: ${LOGGING_LEVEL:INFO}
+    ru.leti.wise.task.plugin: ${LOGGING_LEVEL:INFO}
+
+grpc:
+  service:
+    graph:
+      port: ${GRAPH_GRPC_PORT:6565}
+      host: ${GRAPH_APP_NAME:localhost}
+    plugin:
+      port: ${PLUGIN_GRPC_PORT:6566}
+      host: ${PLUGIN_APP_NAME:localhost}
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://${TEMPO_HOST:localhost}:${TEMPO_PORT:4318}/v1/traces
+  otlp:
+    metrics:
+      export:
+        enabled: false # prometheus will do it
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true

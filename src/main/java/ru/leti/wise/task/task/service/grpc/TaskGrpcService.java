@@ -2,18 +2,17 @@ package ru.leti.wise.task.task.service.grpc;
 
 import com.google.protobuf.Empty;
 import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.lognet.springboot.grpc.GRpcService;
-import org.lognet.springboot.grpc.recovery.GRpcExceptionHandler;
-import org.lognet.springboot.grpc.recovery.GRpcExceptionScope;
-import org.lognet.springboot.grpc.recovery.GRpcServiceAdvice;
+import org.springframework.grpc.server.advice.GrpcAdvice;
+import org.springframework.grpc.server.advice.GrpcExceptionHandler;
+import org.springframework.grpc.server.service.GrpcService;
 import ru.leti.wise.task.task.TaskGrpc;
-import ru.leti.wise.task.task.TaskServiceGrpc;
+import ru.leti.wise.task.task.TaskServiceGrpc.TaskServiceImplBase;
 import ru.leti.wise.task.task.error.BusinessException;
-import ru.leti.wise.task.task.error.GrpcErrorHandler;
 import ru.leti.wise.task.task.helper.LogInterceptor;
 import ru.leti.wise.task.task.logic.*;
 
@@ -21,9 +20,9 @@ import java.util.UUID;
 
 @Slf4j
 @Observed
-@GRpcService(interceptors = { LogInterceptor.class })
+@GrpcService(interceptors = {LogInterceptor.class})
 @RequiredArgsConstructor
-public class TaskGrpcService extends TaskServiceGrpc.TaskServiceImplBase {
+public class TaskGrpcService extends TaskServiceImplBase {
 
     private final GetTaskOperation getTaskOperation;
     private final GetTasksOperation getTasksOperation;
@@ -47,8 +46,8 @@ public class TaskGrpcService extends TaskServiceGrpc.TaskServiceImplBase {
     }
 
     @Override
-    public void getAllTask(Empty request, StreamObserver<TaskGrpc.GetAllTaskResponse> responseObserver) {
-        responseObserver.onNext(getTasksOperation.activate());
+    public void getAllTask(TaskGrpc.GetAllTaskRequest request, StreamObserver<TaskGrpc.GetAllTaskResponse> responseObserver) {
+        responseObserver.onNext(getTasksOperation.activate(request));
         responseObserver.onCompleted();
     }
 
@@ -125,14 +124,13 @@ public class TaskGrpcService extends TaskServiceGrpc.TaskServiceImplBase {
         responseObserver.onCompleted();
     }
 
-    @GRpcServiceAdvice
+    @GrpcAdvice
     @RequiredArgsConstructor
-    static class ErrorHandler {
-        private final GrpcErrorHandler grpcErrorHandler;
+    public static class ErrorHandler {
 
-        @GRpcExceptionHandler
-        public Status handleBusinessException(BusinessException e, GRpcExceptionScope scope) {
-            return grpcErrorHandler.processError(e);
+        @GrpcExceptionHandler
+        public StatusRuntimeException handleBusinessException(BusinessException e) {
+            return e.getStatus().withDescription(e.getMessage()).asRuntimeException();
         }
     }
 }
