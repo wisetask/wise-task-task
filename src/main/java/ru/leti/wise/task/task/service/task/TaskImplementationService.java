@@ -43,8 +43,8 @@ public class TaskImplementationService {
         solutionImplementation.setAuthorId(task.getAuthorId());
         solutionImplementation.setIsCorrect(result.getResult());
         List<SolutionImplementation.GraphResult> graphResults = new ArrayList<>();
-        for (int i = 0; i < result.getGraphTaskResultList().size(); i++) {
-            var res = result.getGraphTaskResultList().get(i);
+        for (int i = 0; i < result.getGraphTestResultsList().size(); i++) {
+            var res = result.getGraphTestResultsList().get(i);
             SolutionImplementation.GraphResult graphResult = new SolutionImplementation.GraphResult();
             graphResult.setId(UUID.fromString(res.getGraphId()));
             graphResult.setOriginalResult(res.getOriginalResult());

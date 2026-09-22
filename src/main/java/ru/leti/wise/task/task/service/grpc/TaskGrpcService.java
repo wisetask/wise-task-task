@@ -32,7 +32,7 @@ public class TaskGrpcService extends TaskServiceImplBase {
     private final CreateTaskOperation createTaskOperation;
     private final GetTaskSolutionOperation getTaskSolutionOperation;
     private final GetTaskSolutionsOperation getTaskSolutionsOperation;
-    private final GetUserSolutionStatisticOperation getUserSolutionStatisticOperation;
+    private final GetTasksByIdsOperation getTasksByIdsOperation;
     private final CreateCatalogOperation createCatalogOperation;
     private final DeleteCatalogOperation deleteCatalogOperation;
     private final GetCatalogsOperation getCatalogsOperation;
@@ -89,8 +89,8 @@ public class TaskGrpcService extends TaskServiceImplBase {
     }
 
     @Override
-    public void getUserSolutionStatistic(TaskGrpc.GetUserSolutionStatisticRequest request, StreamObserver<TaskGrpc.GetUserSolutionStatisticResponse> responseObserver) {
-        responseObserver.onNext(getUserSolutionStatisticOperation.activate(request));
+    public void getTasksByIds(TaskGrpc.TaskIds request, StreamObserver<TaskGrpc.GetTasksByIdsResponse> responseObserver) {
+        responseObserver.onNext(getTasksByIdsOperation.activate(request));
         responseObserver.onCompleted();
     }
 

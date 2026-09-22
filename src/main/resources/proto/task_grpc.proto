@@ -4,6 +4,7 @@ package ru.leti.wise.task.task;
 
 import "task.proto";
 import "google/protobuf/empty.proto";
+import "pagination.proto";
 
 service TaskService {
   rpc GetTask(GetTaskRequest) returns (GetTaskResponse);
@@ -14,17 +15,12 @@ service TaskService {
   rpc SolveTask(SolveTaskRequest) returns (SolveTaskResponse);
   rpc GetTaskSolution(GetTaskSolutionRequest) returns (GetTaskSolutionResponse);
   rpc GetAllTaskSolutions(GetAllTaskSolutionsRequest) returns (GetAllTaskSolutionsResponse);
-  rpc GetUserSolutionStatistic(GetUserSolutionStatisticRequest) returns (GetUserSolutionStatisticResponse);
+  rpc GetTasksByIds(TaskIds) returns (GetTasksByIdsResponse);
   rpc CreateCatalog(CreateCatalogRequest) returns (CreateCatalogResponse);
   rpc DeleteCatalog(DeleteCatalogRequest) returns (google.protobuf.Empty);
   rpc UpdateCatalog(UpdateCatalogRequest) returns (UpdateCatalogResponse);
   rpc GetCatalog(GetCatalogRequest) returns (GetCatalogResponse);
   rpc GetAllCatalogs(google.protobuf.Empty) returns (GetAllCatalogsResponse);
-}
-
-message PaginationRequest {
-  int32 page_size = 1;
-  int32 page = 2;
 }
 
 message TaskFilter {
@@ -37,22 +33,13 @@ message TaskFilter {
 }
 
 message GetAllTaskRequest {
-  PaginationRequest pagination = 1;
+  ru.leti.wise.task.pagination.PaginationRequest pagination = 1;
   TaskFilter filter = 2;
-}
-
-message PaginationResponse {
-  int32 page = 1;
-  int32 page_size = 2;
-  int64 total_count = 3;
-  int32 total_pages = 4;
-  bool has_next = 5;
-  bool has_previous = 6;
 }
 
 message GetAllTaskResponse {
   repeated Task items = 1;
-  PaginationResponse pagination = 2;
+  ru.leti.wise.task.pagination.PaginationResponse pagination = 2;
 }
 
 message CreateCatalogRequest {
@@ -132,18 +119,21 @@ message GetTaskSolutionResponse {
 }
 
 message GetAllTaskSolutionsRequest {
-  string task_id = 1;
-  string author_id = 2;
+  ru.leti.wise.task.pagination.PaginationRequest pagination = 1;
+  string task_id = 2;
+  string author_id = 3;
+  bool is_correct = 4;
 }
 
 message GetAllTaskSolutionsResponse {
-  repeated Solution solution = 1;
+  repeated Solution items = 1;
+  ru.leti.wise.task.pagination.PaginationResponse pagination = 2;
 }
 
-message GetUserSolutionStatisticRequest {
-  string author_id = 1;
+message TaskIds {
+  repeated string task_ids = 1;
 }
 
-message GetUserSolutionStatisticResponse {
-  repeated Solution solution = 1;
+message GetTasksByIdsResponse {
+  repeated Task tasks = 1;
 }
