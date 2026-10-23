@@ -24,7 +24,7 @@ public class SolveTaskOperation {
         } else if (request.getSolution().hasSolutionGraph()) {
             return taskGraphService.process(request);
         }
-        throw new BusinessException(Status.INVALID_ARGUMENT, "Неизвестный тип задачи. Допступные типы задач: " +
+        throw new BusinessException(Status.INVALID_ARGUMENT, "Неизвестный тип задачи. Доступные типы задач: " +
                 TaskType.getStringTypes()
         );
     }

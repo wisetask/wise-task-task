@@ -15,6 +15,7 @@ import ru.leti.wise.task.task.repository.TaskRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -67,7 +68,7 @@ public class GetTasksOperation {
                 ));
 
             if (filter.hasAuthorId())
-                predicates.add(cb.equal(root.get("authorId"), filter.getAuthorId()));
+                predicates.add(cb.equal(root.get("authorId"), UUID.fromString(filter.getAuthorId())));
 
             if (filter.hasIsPublic())
                 predicates.add(cb.equal(

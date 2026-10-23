@@ -18,7 +18,7 @@ public interface TaskMapper {
         } else if (task.hasTaskImplementation()) {
             return toTaskImplementation(task);
         }
-        throw new BusinessException(Status.INVALID_ARGUMENT, "Неизвестный тип задачи. Допступные типы задач: " +
+        throw new BusinessException(Status.INVALID_ARGUMENT, "Неизвестный тип задачи. Доступные типы задач: " +
                 TaskType.getStringTypes()
         );
     }
@@ -40,7 +40,7 @@ public interface TaskMapper {
         } else if (task instanceof TaskImplementation) {
             return toTaskImplementation((TaskImplementation) task);
         }
-        throw new BusinessException(Status.INVALID_ARGUMENT, "Неизвестный тип задачи. Допступные типы задач: " +
+        throw new BusinessException(Status.INVALID_ARGUMENT, "Неизвестный тип задачи. Доступные типы задач: " +
                 TaskType.getStringTypes()
         );
     }
