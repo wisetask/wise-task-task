@@ -17,7 +17,7 @@ spring:
         format_sql: false
   grpc:
     server:
-      port: ${TASK_GRPC_PORT:6567}
+      port: ${TASK_GRPC_PORT:6568}
 
 logging:
   level:

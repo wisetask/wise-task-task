@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-import ru.leti.wise.task.plugin.PluginGrpc;
+import ru.leti.wise.task.pagination.Pagination;
 import ru.leti.wise.task.task.TaskGrpc;
 import ru.leti.wise.task.task.TaskGrpc.GetAllTaskResponse;
 import ru.leti.wise.task.task.mapper.TaskMapper;
@@ -15,6 +15,7 @@ import ru.leti.wise.task.task.repository.TaskRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -35,7 +36,7 @@ public class GetTasksOperation {
                 pageable
         );
         var tasks = taskMapper.toTasks(taskPage.getContent());
-        var paginationResponse = TaskGrpc.PaginationResponse.newBuilder()
+        var paginationResponse = Pagination.PaginationResponse.newBuilder()
                 .setPage(taskPage.getNumber())
                 .setPageSize(taskPage.getSize())
                 .setTotalCount(taskPage.getTotalElements())
@@ -56,9 +57,9 @@ public class GetTasksOperation {
             if (filter.hasName())
                 predicates.add(cb.like(cb.lower(root.get("name")), "%" + filter.getName().toLowerCase() + "%"));
             if (filter.hasDescription())
-                predicates.add(cb.like(root.get("description"), "%" + filter.getDescription().toLowerCase() + "%"));
+                predicates.add(cb.like(cb.lower(root.get("description")), "%" + filter.getDescription().toLowerCase() + "%"));
             if (filter.hasCategory())
-                predicates.add(cb.like(root.get("category"), "%s" + filter.getCategory().toLowerCase() + "%s"));
+                predicates.add(cb.like(cb.lower(root.get("category")), "%" + filter.getCategory().toLowerCase() + "%"));
 
             if (filter.hasTaskType())
                 predicates.add(cb.equal(
@@ -67,7 +68,7 @@ public class GetTasksOperation {
                 ));
 
             if (filter.hasAuthorId())
-                predicates.add(cb.equal(root.get("authorId"), filter.getAuthorId()));
+                predicates.add(cb.equal(root.get("authorId"), UUID.fromString(filter.getAuthorId())));
 
             if (filter.hasIsPublic())
                 predicates.add(cb.equal(
