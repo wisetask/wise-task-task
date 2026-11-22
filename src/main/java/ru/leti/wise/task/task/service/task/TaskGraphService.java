@@ -110,7 +110,7 @@ public class TaskGraphService {
             return PluginOuterClass.Solution.newBuilder()
                     .setPluginId(pluginInfo.getPluginId().toString())
                     .setPluginType(PluginOuterClass.PluginType.valueOf(pluginInfo.getPluginType().toString()))
-                    .setGraph(graphGrpcService.getGraphById(graphId))
+                    .setGraph(graphGrpcService.getGraphById(graphId.toString()))
                     .setOtherGraph(graph)
                     .build();
         }

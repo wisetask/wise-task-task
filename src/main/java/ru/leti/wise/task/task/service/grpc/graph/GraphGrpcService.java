@@ -35,11 +35,15 @@ public class GraphGrpcService {
         return graphService.createGraph(request);
     }
 
-    public Graph getGraphById(UUID id) {
+    public Graph getGraphById(String graphId) {
         var request = GraphGrpc.GetGraphByIdRequest.newBuilder()
-                .setId(id.toString())
+                .setId(graphId)
                 .build();
 
         return graphService.getGraphById(request).getGraph();
+    }
+    public String deleteGraph(String graphID) {
+        var request = GraphGrpc.RemoveGraphRequest.newBuilder().setId(graphID).build();
+        return graphService.removeGraph(request).getId();
     }
 }

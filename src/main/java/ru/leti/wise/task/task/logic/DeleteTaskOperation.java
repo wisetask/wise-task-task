@@ -26,7 +26,6 @@ public class DeleteTaskOperation {
             );
         }
         solutionRepository.deleteByTaskId(id);
-        // todo удаление задач из каталогов
         taskRepository.deleteById(id);
     }
 }

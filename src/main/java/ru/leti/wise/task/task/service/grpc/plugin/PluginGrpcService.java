@@ -6,6 +6,8 @@ import ru.leti.wise.task.plugin.PluginGrpc;
 import ru.leti.wise.task.plugin.PluginOuterClass;
 import ru.leti.wise.task.plugin.PluginServiceGrpc;
 
+import java.util.List;
+
 
 @Component
 @RequiredArgsConstructor
@@ -26,5 +28,10 @@ public class PluginGrpcService {
                 .setFile(implementationFile)
                 .build();
         return pluginService.checkPluginImplementation(request).getImplementationResult();
+    }
+
+    public List<PluginOuterClass.Plugin> getPluginsByIds(List<String> pluginsIds) {
+        var request = PluginGrpc.PluginIds.newBuilder().addAllPluginIds(pluginsIds).build();
+        return pluginService.getPluginsByIds(request).getPluginsList();
     }
 }
