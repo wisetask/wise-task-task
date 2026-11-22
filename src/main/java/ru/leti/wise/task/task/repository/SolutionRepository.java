@@ -9,6 +9,5 @@ import java.util.UUID;
 
 @Observed
 public interface SolutionRepository extends JpaRepository<Solution, UUID>, JpaSpecificationExecutor<Solution> {
-
     void deleteByTaskId(UUID taskId);
 }

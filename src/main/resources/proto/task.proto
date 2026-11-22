@@ -34,6 +34,7 @@ message TaskGraph {
   ru.leti.wise.task.graph.Graph graph = 2;
   Rule rule = 3;
   repeated PluginInfo condition = 4;
+  ru.leti.wise.task.plugin.GraphType graph_type = 5;
 }
 
 message PluginInfo {

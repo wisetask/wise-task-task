@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="create-base-tables" author="magofrays">
+        <sql>
+            CREATE TABLE IF NOT EXISTS catalog (
+                id uuid not null default gen_random_uuid(),
+                author_id uuid,
+                'catalog' varchar(255),
+                'name' varchar(255) ,
+                primary key (id)
+            );
+
+            CREATE TABLE IF NOT EXISTS catalog_student_ids (
+                catalog_id uuid not null,
+                student_ids uuid not null
+            );
+
+            CREATE TABLE IF NOT EXISTS solution (
+                id uuid not null default gen_random_uuid(),
+                is_correct boolean not null,
+                author_id uuid not null,
+                task_id uuid not null,
+                primary key (id)
+            );
+
+            CREATE TABLE IF NOT EXISTS solution_graph (
+                id uuid not null default gen_random_uuid(),
+                graph_id uuid not null,
+                'result' jsonb,
+                primary key (id)
+            );
+
+            CREATE TABLE IF NOT EXISTS solution_implementation (
+                id uuid not null default gen_random_uuid(),
+                code text,
+                implementation_result jsonb,
+                primary key (id)
+            );
+
+            CREATE TABLE IF NOT EXISTS task (
+                id uuid not null default gen_random_uuid(),
+                is_public boolean,
+                author_id uuid not null,
+                category varchar(255),
+                description text,
+                'name' varchar(255),
+                task_type varchar(255) check (task_type in ('IMPLEMENTATION','GRAPH')),
+                primary key (id)
+            );
+
+            CREATE TABLE IF NOT EXISTS task_catalog (
+                catalog_id uuid not null,
+                task_id uuid not null
+            );
+
+            CREATE TABLE IF NOT EXISTS task_graph (
+                id uuid not null default gen_random_uuid(),
+                is_hidden_mistake boolean,
+                graph_id uuid,
+                'condition' jsonb,
+                rule jsonb,
+                primary key (id)
+            );
+
+            CREATE TABLE IF NOT EXISTS task_implementation (
+                id uuid not null default gen_random_uuid(),
+                plugin_id uuid not null,
+                primary key (id)
+            );
+
+            ALTER TABLE catalog_student_ids
+                ADD CONSTRAINT fk_catalog_student_ids_catalog
+                    FOREIGN KEY (catalog_id) REFERENCES catalog (id) ON DELETE CASCADE;
+
+            ALTER TABLE solution
+                ADD CONSTRAINT fk_solution_task
+                    FOREIGN KEY (task_id) REFERENCES task (id) ON DELETE CASCADE;
+
+            ALTER TABLE task_catalog
+                ADD CONSTRAINT fk_task_catalog_catalog
+                    FOREIGN KEY (catalog_id) REFERENCES catalog (id) ON DELETE CASCADE,
+                ADD CONSTRAINT fk_task_catalog_task
+                    FOREIGN KEY (task_id) REFERENCES task (id) ON DELETE CASCADE;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

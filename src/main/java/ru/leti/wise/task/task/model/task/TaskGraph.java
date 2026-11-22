@@ -1,8 +1,6 @@
 package ru.leti.wise.task.task.model.task;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -28,6 +26,10 @@ public class TaskGraph extends Task {
 
     @JdbcTypeCode(SqlTypes.JSON)
     private Rule rule;
+
+    @Column(name = "graph_type")
+    @Enumerated(value = EnumType.STRING)
+    private GraphType graphType;
 
     @Data
     public static class PluginInfo {
