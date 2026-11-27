@@ -9,7 +9,6 @@ enum PluginType {
   GRAPH_CHARACTERISTIC = 0;
   GRAPH_PROPERTY = 1;
   GRAPH_NEW_GRAPH = 2;
-  GRAPH_STRING = 3;
 }
 
 enum GraphType {
@@ -31,18 +30,6 @@ message Plugin {
   bool isValid = 10;
   PluginType plugin_type = 11;
   bool is_internal = 12;
-}
-
-message Solution {
-  string pluginId = 1;
-  PluginType pluginType = 2;
-  oneof Payload {
-    ru.leti.wise.task.graph.Graph graph = 3;
-  }
-  oneof AdditionalPayload {
-    ru.leti.wise.task.graph.Graph other_graph = 4;
-    string handwritten_answer = 5;
-  }
 }
 
 message ImplementationResult {

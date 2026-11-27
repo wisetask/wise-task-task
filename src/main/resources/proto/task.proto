@@ -76,12 +76,6 @@ message Solution {
 message SolutionGraph {
   ru.leti.wise.task.graph.Graph graph = 1;
   repeated PluginResult plugin_results = 2;
-  repeated PluginStringInput plugin_string_result = 3;
-}
-
-message PluginStringInput {
-  string plugin_id = 1;
-  string hand_written_answer = 2;
 }
 
 message PluginResult {
@@ -94,10 +88,10 @@ message PluginResult {
 
 message SolutionImplementation {
   string code = 1;
-  repeated GraphResult implementation_result = 2;
+  repeated ImplementationResult implementation_result = 2;
 }
 
-message GraphResult {
+message ImplementationResult {
   string id = 1;
   double original_time_result = 2;
   double time_result = 3;

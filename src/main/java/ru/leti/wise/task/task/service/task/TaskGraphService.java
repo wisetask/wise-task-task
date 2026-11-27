@@ -6,11 +6,13 @@ import org.springframework.stereotype.Component;
 import ru.leti.wise.task.graph.GraphOuterClass;
 import ru.leti.wise.task.plugin.PluginOuterClass;
 import ru.leti.wise.task.task.TaskGrpc;
+import ru.leti.wise.task.task.TaskOuterClass;
 import ru.leti.wise.task.task.error.BusinessException;
 import ru.leti.wise.task.task.mapper.SolutionMapper;
 import ru.leti.wise.task.task.model.solution.SolutionGraph;
 import ru.leti.wise.task.task.model.task.PluginType;
 import ru.leti.wise.task.task.model.task.TaskGraph;
+import ru.leti.wise.task.task.model.task.TaskType;
 import ru.leti.wise.task.task.repository.SolutionRepository;
 import ru.leti.wise.task.task.repository.TaskRepository;
 import ru.leti.wise.task.task.service.grpc.graph.GraphGrpcService;
@@ -33,13 +35,21 @@ public class TaskGraphService {
     private final PluginGrpcService pluginGrpcService;
 
     public TaskGrpc.SolveTaskResponse process(TaskGrpc.SolveTaskRequest request) {
-        SolutionGraph solution = solutionMapper.toSolutionGraph(request.getSolution());
-        TaskGraph task = (TaskGraph) taskRepository.findById(solution.getTaskId())
-                .orElseThrow(() -> new BusinessException(
-                        Status.NOT_FOUND,
-                        "Задача c id %s не существует".formatted(solution.getTaskId())));
+        if (!request.hasSolution()) {
+            throw new BusinessException(Status.INVALID_ARGUMENT, "В запросе отсутствует решение");
+        }
+        var solution = request.getSolution();
+        if (solution.hasSolutionGraph()) {
+            return processTaskGraph(solution);
+        } else if (solution.hasSolutionImplementation()) {
+            processTaskImplementation(solution);
+        }
+        throw new BusinessException(Status.INVALID_ARGUMENT, "Неизвестный тип задачи. Доступные типы задач: " +
+                TaskType.getStringTypes()
+        );
         var graph = request.getSolution().getSolutionGraph().getGraph();
-        graph.toBuilder().setAuthorId(request.getSolution().getAuthorId()).build();
+        var authorId = request.getSolution().getAuthorId();
+        graph.toBuilder().setAuthorId(authorId).build();
         HashMap<UUID, String> handWrittenAnswer = new HashMap<>();
         var solutionGraph = request.getSolution().getSolutionGraph();
         solutionGraph.getPluginStringResultList()
@@ -70,12 +80,38 @@ public class TaskGraphService {
                 .build();
     }
 
+    private TaskGrpc.SolveTaskResponse processTaskGraph(TaskOuterClass.Solution solution) {
+        SolutionGraph solutionEntity = solutionMapper.toSolutionGraph(solution);
+        TaskGraph task = (TaskGraph) taskRepository.findById(solutionEntity.getTaskId())
+                .orElseThrow(() -> new BusinessException(
+                        Status.NOT_FOUND,
+                        "Задача c id %s не существует".formatted(solution.getTaskId())));
+        var graph = solution.getSolutionGraph().getGraph();
+        var authorId = solution.getAuthorId();
+        graph.toBuilder().setAuthorId(authorId).build();
+        var graphResponse = graphGrpcService.createGraph(graph).getGraph();
+        var graphId = UUID.fromString(graphResponse.getId());
+        var pluginResults = task.getCondition().stream()
+                .map(pluginInfo -> getPluginResult(pluginInfo, graphResponse))
+                .toList();
+        boolean isCorrect = pluginResults.stream()
+                .allMatch(SolutionGraph.PluginResult::getIsCorrect);
+        solutionEntity.setGraphId(graphId);
+        solutionEntity.setResult(pluginResults);
+        solutionEntity.setIsCorrect(isCorrect);
+        solutionRepository.save(solutionEntity);
+        var solutionResponse = solutionMapper.toSolution(solutionEntity);
+        return TaskGrpc.SolveTaskResponse.newBuilder()
+                .setSolution(solutionResponse).build();
+    }
+
+    private void processTaskImplementation(TaskOuterClass.Solution solution) {
+
+    }
+
     private SolutionGraph.PluginResult getPluginResult(TaskGraph.PluginInfo pluginInfo,
-                                                       GraphOuterClass.Graph graph,
-                                                       TaskGraph taskGraph,
-                                                       String handWrittenAnswer) {
-        var response = pluginGrpcService.checkPluginSolution(buildPluginSolution(pluginInfo, graph,
-                taskGraph.getGraphId(), handWrittenAnswer));
+                                                       GraphOuterClass.Graph graph) {
+        var response = pluginGrpcService.checkPluginSolution(String.valueOf(pluginInfo.getPluginId()), graph);
         var isCorrect = isCorrect(pluginInfo, response);
         return SolutionGraph.PluginResult.builder()
                 .pluginId(pluginInfo.getPluginId())
@@ -100,26 +136,6 @@ public class TaskGraphService {
             }
         }
         return isCorrect;
-    }
-
-    private PluginOuterClass.Solution buildPluginSolution(TaskGraph.PluginInfo pluginInfo,
-                                                          GraphOuterClass.Graph graph,
-                                                          UUID graphId,
-                                                          String handWrittenAnswer) {
-        if (pluginInfo.getPluginType() == PluginType.GRAPH_NEW_GRAPH) {
-            return PluginOuterClass.Solution.newBuilder()
-                    .setPluginId(pluginInfo.getPluginId().toString())
-                    .setPluginType(PluginOuterClass.PluginType.valueOf(pluginInfo.getPluginType().toString()))
-                    .setGraph(graphGrpcService.getGraphById(graphId.toString()))
-                    .setOtherGraph(graph)
-                    .build();
-        }
-        return PluginOuterClass.Solution.newBuilder()
-                .setPluginId(pluginInfo.getPluginId().toString())
-                .setPluginType(PluginOuterClass.PluginType.valueOf(pluginInfo.getPluginType().toString()))
-                .setHandwrittenAnswer(handWrittenAnswer)
-                .setGraph(graph)
-                .build();
     }
 
     private Boolean validateCharacteristic(Integer response, Integer value, String sign) {

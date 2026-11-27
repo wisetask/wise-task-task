@@ -4,6 +4,7 @@ package ru.leti.wise.task.plugin;
 
 import "plugin.proto";
 import "pagination.proto";
+import "graph.proto";
 import "google/protobuf/empty.proto";
 
 service PluginService {
@@ -13,7 +14,7 @@ service PluginService {
   rpc GetPlugin (GetPluginRequest) returns (GetPluginResponse);
   rpc UpdatePlugin (UpdatePluginRequest) returns (UpdatePluginResponse);
   rpc DeletePlugin (DeletePluginRequest) returns (DeletePluginResponse);
-  rpc CheckPluginSolution (CheckPluginSolutionRequest) returns (CheckPluginSolutionResponse);
+  rpc ExecutePluginOnGraph (ExecutePluginOnGraphRequest) returns (ExecutePluginOnGraphResponse);
   rpc CheckPluginImplementation (CheckPluginImplementationRequest) returns (CheckPluginImplementationResponse);
   rpc ValidatePlugin (ValidatePluginRequest) returns (ValidatePluginResponse);
 }
@@ -78,11 +79,12 @@ message DeletePluginResponse {
   string id = 1;
 }
 
-message CheckPluginSolutionRequest {
-  Solution solution = 1;
+message ExecutePluginOnGraphRequest {
+  string plugin_id = 1;
+  ru.leti.wise.task.graph.Graph graph = 2;
 }
 
-message CheckPluginSolutionResponse {
+message ExecutePluginOnGraphResponse {
   string result = 1;
 }
 
